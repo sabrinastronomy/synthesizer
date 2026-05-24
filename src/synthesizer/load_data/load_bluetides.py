@@ -278,6 +278,8 @@ def load_BlueTides(
             `ParticleGalaxy` object containing specified
             stars and gas components
     """
+    galaxy_bhid = np.array(galaxy_bhid, dtype=np.uint64) # ensure galaxy_bhid is a numpy array for later use
+
     if dataholder is None:
         print(f"Loading in BlueTides data from z = ~{redshift}... (exact redshift is pulled from file header)")
         dataholder = BlueTidesDataHolder(
@@ -289,7 +291,6 @@ def load_BlueTides(
     galaxies_length = len(
         dataholder.bh_mass
     )  # holder array for galaxies of the same length
-    galaxies = [None] * galaxies_length
     smoothing_length_proper_bluetides = (1.5 / dataholder.hh * kpc) / (
         1 + dataholder.z
     )
@@ -299,10 +300,19 @@ def load_BlueTides(
     else:
         # Get galaxies with the BHIDs you desire
         # (since the indices are different for each redshift)
+        assert dataholder.bhid.dtype == galaxy_bhid.dtype, (
+            f"dtype mismatch: dataholder.bhid is {dataholder.bhid.dtype}, "
+            f"galaxy_bhid is {galaxy_bhid.dtype}"
+        )
         _, bh_indices, _ = np.intersect1d(
             dataholder.bhid, galaxy_bhid, return_indices=True
         )
+        print("Number of galaxies with specified BHIDs found in dataholder:", len(bh_indices))
         galaxy_cycle = bh_indices
+
+    actual_galaxies_length = len(galaxy_cycle)
+    galaxies = [None] * actual_galaxies_length
+
 
     # Grab stellar particles associated with each galaxy and
     # assign to galaxy in galaxies array
@@ -354,5 +364,6 @@ def load_BlueTides(
             current_masses=masses * Msun,
             smoothing_lengths=smoothing_lengths,
         )
+        galaxies[ii].centre = dataholder.bh_position[:, bh_index]
 
     return galaxies
