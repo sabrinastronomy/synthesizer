@@ -110,19 +110,19 @@ class BlueTidesDataHolder:
         self.z = z
 
         # Load all BlueTides data
-        if self.z == "7":
+        if self.z == 7:
             sunset = BigFile(bluetides_data_folder + "sunset_208")
             pig_zoo = [bluetides_data_folder + "PIG_208"]
             length_of_bhar = end_of_arr
-        elif self.z == "6.5":
+        elif self.z == 6.5:
             sunset = BigFile(bluetides_data_folder + "sunset_271")
             pig_zoo = [bluetides_data_folder + "PIG_271"]
             length_of_bhar = end_of_arr
-        elif self.z == "7.5":
+        elif self.z == 7.5:
             pig_zoo = [bluetides_data_folder + "PIG_129"]
             sunset = BigFile(bluetides_data_folder + "sunset_129")
             length_of_bhar = end_of_arr
-        elif self.z == "8":
+        elif self.z == 8:
             pig_zoo = [bluetides_data_folder + "PIG_086"]
             sunset = BigFile(bluetides_data_folder + "sunset_086")
             length_of_bhar = end_of_arr
@@ -235,8 +235,8 @@ class BlueTidesDataHolder:
 
 
 def load_BlueTides(
-    redshift,
     dataholder=None,
+    redshift=6.5,
     galaxy_bhid=[],
     end_arr=108001,
     sort_bhar=True,
@@ -246,13 +246,15 @@ def load_BlueTides(
     """Load BlueTides galaxies into a galaxy object.
 
     Args:
-        redshift (str):
-            desired redshift to extract BlueTides galaxies,
-            note the exact redshift is pulled from the BlueTides file header
+
         dataholder (BlueTidesDataHolder object):
             contains all data for a particular simulation of BlueTides
             (default is `None` and dataholder class will be generated from
             a BlueTides simulation file for the given redshift)
+        redshift (str):
+            desired redshift to extract BlueTides galaxies,
+            note the exact redshift is pulled from the BlueTides file header
+            NOT used if dataholder is not `None` (default is "6.5")
         galaxy_bhid (array):
             contains all the galaxy BHIDs to include in your galaxy object
             Note: each BlueTides dataholder has arrays sorted in descending
@@ -277,14 +279,13 @@ def load_BlueTides(
             stars and gas components
     """
     if dataholder is None:
-        print(f"Loading in BlueTides data from z = {redshift}...")
+        print(f"Loading in BlueTides data from z = ~{redshift}... (exact redshift is pulled from file header)")
         dataholder = BlueTidesDataHolder(
             redshift,
             bluetides_data_folder=bluetides_data_folder,
             end_of_arr=end_arr,
             sort_bhar=sort_bhar,
         )
-
     galaxies_length = len(
         dataholder.bh_mass
     )  # holder array for galaxies of the same length
@@ -340,15 +341,15 @@ def load_BlueTides(
             y = star_pos[:, 1]
             z = star_pos[:, 2]
 
-        smoothing_lengths = np.full(
-            ages.shape, smoothing_length_proper_bluetides
+        smoothing_lengths = (
+            np.ones(ages.shape) * smoothing_length_proper_bluetides
         )
 
         coords = np.transpose([x, y, z])
         galaxies[ii].load_stars(
             initial_masses=imasses * Msun,
             ages=ages * Myr,
-            metals=metallicities,
+            metallicities=metallicities,
             coordinates=coords * kpc,
             current_masses=masses * Msun,
             smoothing_lengths=smoothing_lengths,
