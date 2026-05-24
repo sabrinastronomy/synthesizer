@@ -342,10 +342,13 @@ def load_BlueTides(
         if center:
             # Centering all stars around the BH such that (0, 0, 0) is
             # the BH position
-            star_relpos = star_pos - dataholder.bh_position[:, bh_index]
+            star_relpos = star_pos - dataholder.bh_position[:, bh_index]  # relative position to BH
             x = star_relpos[:, 0]
             y = star_relpos[:, 1]
             z = star_relpos[:, 2]
+            # galaxies[ii].centre = [0, 0, 0] * kpc
+            # galaxies[ii].stars.centre = [0, 0, 0] * kpc
+            # this doesn't work yet
         else:
             x = star_pos[:, 0]
             y = star_pos[:, 1]
@@ -364,6 +367,7 @@ def load_BlueTides(
             current_masses=masses * Msun,
             smoothing_lengths=smoothing_lengths,
         )
-        galaxies[ii].centre = dataholder.bh_position[:, bh_index]
+
+        # galaxies[ii].black_holes.centre = [0, 0, 0]
 
     return galaxies
