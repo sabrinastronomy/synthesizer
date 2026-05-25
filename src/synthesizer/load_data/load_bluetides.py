@@ -241,7 +241,7 @@ def load_BlueTides(
     end_arr=108001,
     sort_bhar=True,
     bluetides_data_folder="",
-    center=False,
+    recentre=False,
 ):
     """Load BlueTides galaxies into a galaxy object.
 
@@ -269,8 +269,9 @@ def load_BlueTides(
         bluetides_data_folder (str):
             location of BlueTides pig/sunset files. Only required if
             dataholder is `None` (default is an empty string)
-        center (bool):
-             whether or not to center the galaxy on the Bh
+        recentre (bool):
+             whether or not to center the galaxy on the BH such that (0, 0, 0) is the BH position. 
+             If False, the galaxy will be centered on the median position of the stars.
              (default is False)
 
     Returns:
@@ -339,20 +340,20 @@ def load_BlueTides(
 
         star_pos = dataholder.position_ind[star_off[0] : star_off[1]]
 
-        if center:
+        if recentre:
             # Centering all stars around the BH such that (0, 0, 0) is
             # the BH position
             star_relpos = star_pos - dataholder.bh_position[:, bh_index]  # relative position to BH
             x = star_relpos[:, 0]
             y = star_relpos[:, 1]
-            z = star_relpos[:, 2]
-            # galaxies[ii].centre = [0, 0, 0] * kpc
-            # galaxies[ii].stars.centre = [0, 0, 0] * kpc
+            z = star_relpos[:, 2]  
+            print("(NEED TO CHECK) Centering on black hole so coordinate system origin is the black hole position.")
             # this doesn't work yet
         else:
             x = star_pos[:, 0]
             y = star_pos[:, 1]
             z = star_pos[:, 2]
+
 
         smoothing_lengths = (
             np.ones(ages.shape) * smoothing_length_proper_bluetides
@@ -367,7 +368,13 @@ def load_BlueTides(
             current_masses=masses * Msun,
             smoothing_lengths=smoothing_lengths,
         )
-
-        # galaxies[ii].black_holes.centre = [0, 0, 0]
-
+        centre_on_stars = galaxies[ii].stars.coordinates
+        if recentre:
+            galaxies[ii].centre = [0, 0, 0] * kpc
+            galaxies[ii].stars.centre = [0, 0, 0] * kpc
+            print("Unsure about assigning centre (0, 0, 0)")
+        else:
+            galaxies[ii].centre = np.median(centre_on_stars,axis=0)
+            galaxies[ii].stars.centre = np.median(centre_on_stars,axis=0)
+            
     return galaxies
