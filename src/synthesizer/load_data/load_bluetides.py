@@ -347,7 +347,7 @@ def load_BlueTides(
             x = star_relpos[:, 0]
             y = star_relpos[:, 1]
             z = star_relpos[:, 2]  
-            print("(NEED TO CHECK) Centering on black hole so coordinate system origin is the black hole position.")
+            print("(DOES NOT WORK) Centering on black hole so coordinate system origin is the black hole position.")
             # this doesn't work yet
         else:
             x = star_pos[:, 0]
@@ -376,5 +376,5 @@ def load_BlueTides(
         else:
             galaxies[ii].centre = np.median(centre_on_stars,axis=0)
             galaxies[ii].stars.centre = np.median(centre_on_stars,axis=0)
-            
+
     return galaxies
